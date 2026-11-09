@@ -1,6 +1,9 @@
 metric,value
-cases,8
-ok,8
-pos,3
-pos_flips,3
-neg,5
+cases,22
+ok,22
+pos,2
+pos_flips,2
+neg,7
+defense_in_depth,1
+adv,12
+post_accept,0

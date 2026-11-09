@@ -1,9 +1,23 @@
 id,kind,pre,post,expected_pre,expected_post,ok,flips,description
-p01_hs256_on_pubkey_idp,pos,ACCEPT,REJECT,ACCEPT,REJECT,True,True,JWT Authorization Grant + hardcoded pubkey IdP + alg=HS256
-p02_hs512_on_pubkey_idp,pos,ACCEPT,REJECT,ACCEPT,REJECT,True,True,same path with alg=HS512
-p03_none_alg,pos,ACCEPT,REJECT,ACCEPT,REJECT,True,True,alg=none rejected post; pre accepted if no expected alg set
-n01_rs256,neg,ACCEPT,ACCEPT,ACCEPT,ACCEPT,True,False,legitimate RS256 assertion on pubkey IdP
-n02_es256,neg,ACCEPT,ACCEPT,ACCEPT,ACCEPT,True,False,ES256 asymmetric
-n03_expected_mismatch,neg,REJECT,REJECT,REJECT,REJECT,True,False,expected RS256 but token says ES256
+p01_hs256_der_secret,pos,ACCEPT,REJECT,ACCEPT,REJECT,True,True,"HS256 signed with DER of IdP pubkey (diff tests L263-277, L408-421)"
+p02_hs512_der_secret,pos,ACCEPT,REJECT,ACCEPT,REJECT,True,True,"HS512, same secret (validator diff L85-89; no dedicated HS512 test)"
+n01_rs256,neg,PROCEEDS_TO_SIGNATURE_CHECK,PROCEEDS_TO_SIGNATURE_CHECK,PROCEEDS_TO_SIGNATURE_CHECK,PROCEEDS_TO_SIGNATURE_CHECK,True,False,legitimate RS256 assertion
+n02_es256,neg,PROCEEDS_TO_SIGNATURE_CHECK,PROCEEDS_TO_SIGNATURE_CHECK,PROCEEDS_TO_SIGNATURE_CHECK,PROCEEDS_TO_SIGNATURE_CHECK,True,False,ES256 asymmetric
+n03_expected_mismatch,neg,REJECT,REJECT,REJECT,REJECT,True,False,"expected RS256, token ES256"
 n04_null_alg,neg,REJECT,REJECT,REJECT,REJECT,True,False,missing alg
-n05_hs256_with_expected_rs,neg,REJECT,REJECT,REJECT,REJECT,True,False,HS256 when expected is RS256: rejected both sides by expected check
+n05_hs256_with_expected_rs,neg,REJECT,REJECT,REJECT,REJECT,True,False,HS256 with expected RS256
+n06_hs256_pem_text_secret,neg,BAD_SIGNATURE,REJECT,BAD_SIGNATURE,REJECT,True,False,HS256 keyed with PEM text (wrong secret): pre BAD_SIGNATURE
+n07_hs256_pem_configured,neg,LOADER_EXCEPTION,REJECT,LOADER_EXCEPTION,REJECT,True,False,IdP configured with full PEM (headers): Base64Url.decode throws pre
+d01_alg_none,did,VALIDATOR_PASS_DOWNSTREAM_UNMODELED,REJECT,VALIDATOR_PASS_DOWNSTREAM_UNMODELED,REJECT,True,False,"alg=none: pre validator passes, rest of path unmodelled; post rejects (L81)"
+a01_alg_None,adv,VALIDATOR_PASS_DOWNSTREAM_UNMODELED,REJECT,VALIDATOR_PASS_DOWNSTREAM_UNMODELED,REJECT,True,False,alg='None' (equalsIgnoreCase)
+a02_alg_NONE,adv,VALIDATOR_PASS_DOWNSTREAM_UNMODELED,REJECT,VALIDATOR_PASS_DOWNSTREAM_UNMODELED,REJECT,True,False,alg='NONE'
+a03_alg_hs256_lower,adv,LOADER_EXCEPTION,REJECT,LOADER_EXCEPTION,REJECT,True,False,alg='hs256': getJavaAlgorithm switch is case-sensitive
+a04_alg_int,adv,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,True,False,alg=256 (int)
+a05_alg_list_empty,adv,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,True,False,alg=[]
+a06_alg_dict,adv,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,True,False,alg={}
+a07_alg_bytes_empty,adv,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,UNREPRESENTABLE_ALG,True,False,alg=b''
+a08_key_none,adv,NO_KEY_LOADED,REJECT,NO_KEY_LOADED,REJECT,True,False,configured key null
+a09_key_blank,adv,NO_KEY_LOADED,REJECT,NO_KEY_LOADED,REJECT,True,False,configured key '   ' (trim().isEmpty())
+a10_key_int,adv,UNREPRESENTABLE_KEY,UNREPRESENTABLE_KEY,UNREPRESENTABLE_KEY,UNREPRESENTABLE_KEY,True,False,configured key 42
+a11_empty_signature,adv,BAD_SIGNATURE,REJECT,BAD_SIGNATURE,REJECT,True,False,HS256 with empty signature
+a12_alg_empty_string,adv,LOADER_EXCEPTION,REJECT,LOADER_EXCEPTION,REJECT,True,False,alg=''

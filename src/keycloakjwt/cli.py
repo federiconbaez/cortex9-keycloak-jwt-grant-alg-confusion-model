@@ -12,7 +12,7 @@ def _write_results(out: Path) -> None:
         for r in rows: w.writerow({k:r[k] for k in fields})
     with (out/"summary.csv").open("w", newline="") as fh:
         w = csv.writer(fh); w.writerow(["metric","value"])
-        for m,v in [("cases",len(rows)),("ok",sum(1 for r in rows if r["ok"])),("pos",sum(1 for r in rows if r["kind"]=="pos")),("pos_flips",sum(1 for r in rows if r["kind"]=="pos" and r["flips"])),("neg",sum(1 for r in rows if r["kind"]=="neg"))]:
+        for m,v in [("cases",len(rows)),("ok",sum(1 for r in rows if r["ok"])),("pos",sum(1 for r in rows if r["kind"]=="pos")),("pos_flips",sum(1 for r in rows if r["kind"]=="pos" and r["flips"])),("neg",sum(1 for r in rows if r["kind"]=="neg")),("defense_in_depth",sum(1 for r in rows if r["kind"]=="did")),("adv",sum(1 for r in rows if r["kind"]=="adv")),("post_accept",sum(1 for r in rows if r["post"]=="ACCEPT"))]:
             w.writerow([m,v])
     with (out/"SHA256SUMS").open("w") as fh:
         for name in ("cases.csv","summary.csv"):
