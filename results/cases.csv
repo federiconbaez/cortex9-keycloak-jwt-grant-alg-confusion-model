@@ -1,0 +1,9 @@
+id,kind,pre,post,expected_pre,expected_post,ok,flips,description
+p01_hs256_on_pubkey_idp,pos,ACCEPT,REJECT,ACCEPT,REJECT,True,True,JWT Authorization Grant + hardcoded pubkey IdP + alg=HS256
+p02_hs512_on_pubkey_idp,pos,ACCEPT,REJECT,ACCEPT,REJECT,True,True,same path with alg=HS512
+p03_none_alg,pos,ACCEPT,REJECT,ACCEPT,REJECT,True,True,alg=none rejected post; pre accepted if no expected alg set
+n01_rs256,neg,ACCEPT,ACCEPT,ACCEPT,ACCEPT,True,False,legitimate RS256 assertion on pubkey IdP
+n02_es256,neg,ACCEPT,ACCEPT,ACCEPT,ACCEPT,True,False,ES256 asymmetric
+n03_expected_mismatch,neg,REJECT,REJECT,REJECT,REJECT,True,False,expected RS256 but token says ES256
+n04_null_alg,neg,REJECT,REJECT,REJECT,REJECT,True,False,missing alg
+n05_hs256_with_expected_rs,neg,REJECT,REJECT,REJECT,REJECT,True,False,HS256 when expected is RS256: rejected both sides by expected check
